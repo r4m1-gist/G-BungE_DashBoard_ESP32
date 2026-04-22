@@ -1,0 +1,51 @@
+# for MAC trash DATA
+
+#MAC OS
+.DS_Store
+
+# Build outputs (Clang / GCC)
+
+*.o
+*.out
+*.elf
+*.map
+
+# Debug symbols (macOS)
+
+*.dSYM
+*.dSYM/
+
+# Libraries
+
+*.a
+*.so
+*.dylib
+
+# Coverage / profiling
+
+*.gcno
+*.gcda
+
+# Build directories
+
+build/
+out/
+cmake-build-*/
+
+sdkconfig
+sdkconfig.old
+
+# VSCode
+
+.vscode/
+
+# VSCode C/C++ cache
+
+*.ipch
+
+# Logs / temp
+
+*.log
+*.tmp
+
+# If YOU'RE ON WINDOWS, ADD YOUR OWN IGNORE RULES (I'm too lazy to include them here)

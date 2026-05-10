@@ -1,3 +1,4 @@
 # G-BungE_DashBoard_ESP32
 ESP32-based dashboard system for real-time data monitoring and visualization,
 specifically developed for the Mk.5 Baja EV.
+안녕하세요

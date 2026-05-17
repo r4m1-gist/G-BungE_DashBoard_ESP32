@@ -1,5 +1,7 @@
 /*
-  NodeMCU ESP32-S dual 4-digit 7-segment + LED smoke test
+  NodeMCU ESP32-S LED segment check
+
+  Checks two 4-digit 7-segment modules, three status LEDs, and basic CAN TX/RX.
 
   7-segment module pins:
     VCC, SCLK, RCLK, DIO, GND
@@ -19,7 +21,7 @@
     LED2 -> ESP32 GPIO14 -> resistor -> LED+ / LED- -> GND
     LED3 -> ESP32 GPIO25 -> resistor -> LED+ / LED- -> GND
 
-  CAN transceiver, for later:
+  CAN transceiver:
     SN65HVD230 TXD / CTX -> ESP32 GPIO26
     SN65HVD230 RXD / CRX -> ESP32 GPIO27
     SN65HVD230 VCC       -> ESP32 3V3
@@ -70,8 +72,6 @@ static const uint8_t SEG_D  = 0b00001000;
 static const uint8_t SEG_E  = 0b00010000;
 static const uint8_t SEG_F  = 0b00100000;
 static const uint8_t SEG_G  = 0b01000000;
-static const uint8_t SEG_DP = 0b10000000;
-
 static const uint8_t DIGITS[10] = {
   SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F,          // 0
   SEG_B | SEG_C,                                          // 1
@@ -299,7 +299,7 @@ void setup() {
   delay(300);
 
   Serial.println();
-  Serial.println("NodeMCU ESP32-S CAN test");
+  Serial.println("NodeMCU ESP32-S LED segment check");
   Serial.print("SEG1 pins SCLK/RCLK/DIO: GPIO");
   Serial.print(SEG1.sclk);
   Serial.print(" / GPIO");

@@ -1,7 +1,10 @@
 /*
-  CAN SoC receiver for G-BungE dashboard
+  CAN SoC display test for G-BungE dashboard
 
-  Source ESP sends every 1 second:
+  This is a test sketch kept for checking whether the display ESP can receive
+  and show a simple CAN frame.
+
+  Test source ESP sends every 1 second:
     CAN ID 0x100
     byte 0~1: voltage
     byte 2~3: current

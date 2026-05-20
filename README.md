@@ -5,22 +5,26 @@ ESP32-based dashboard firmware for the Mk.5 Baja EV.
 ## Project Layout
 
 ```text
-main/
-  main.ino
+Firmware/
+  main/
+    main.ino
 
-test/
-  ledsegmentcheck/
-    ledsegmentcheck.ino
+  test/
+    ledsegmentcheck/
+      ledsegmentcheck.ino
 
-  soc_can_display/
-    soc_can_display.ino
+    soc_can_display/
+      soc_can_display.ino
+
+Hardware/
+  README.md
 ```
 
 ## Sketches
 
-- `main/main.ino`: main dashboard sketch
-- `test/ledsegmentcheck/ledsegmentcheck.ino`: 7-segment, LED, and CAN hardware check
-- `test/soc_can_display/soc_can_display.ino`: CAN receive/display test
+- `Firmware/main/main.ino`: main dashboard sketch
+- `Firmware/test/ledsegmentcheck/ledsegmentcheck.ino`: 7-segment and CAN hardware check
+- `Firmware/test/soc_can_display/soc_can_display.ino`: CAN receive/display test
 
 ## Hardware
 

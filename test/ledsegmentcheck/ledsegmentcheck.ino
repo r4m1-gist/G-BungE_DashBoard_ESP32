@@ -1,7 +1,7 @@
 /*
   NodeMCU ESP32-S LED segment check
 
-  Checks two 4-digit 7-segment modules, three status LEDs, and basic CAN TX/RX.
+  Checks three 4-digit 7-segment modules and basic CAN TX/RX.
 
   7-segment module pins:
     VCC, SCLK, RCLK, DIO, GND
@@ -14,12 +14,10 @@
     SEG2 SCLK -> ESP32 GPIO18
     SEG2 RCLK -> ESP32 GPIO19
     SEG2 DIO  -> ESP32 GPIO23
+    SEG3 SCLK -> ESP32 GPIO13
+    SEG3 RCLK -> ESP32 GPIO14
+    SEG3 DIO  -> ESP32 GPIO25
     GND  -> ESP32 GND
-
-  Simple LEDs:
-    LED1 -> ESP32 GPIO13 -> resistor -> LED+ / LED- -> GND
-    LED2 -> ESP32 GPIO14 -> resistor -> LED+ / LED- -> GND
-    LED3 -> ESP32 GPIO25 -> resistor -> LED+ / LED- -> GND
 
   CAN transceiver:
     SN65HVD230 TXD / CTX -> ESP32 GPIO26
@@ -41,8 +39,7 @@ struct SegmentPins {
 
 static const SegmentPins SEG1 = {21, 22, 17};
 static const SegmentPins SEG2 = {18, 19, 23};
-
-static const uint8_t LED_PINS[3] = {13, 14, 25};
+static const SegmentPins SEG3 = {13, 14, 25};
 
 static const uint8_t CAN_TX_PIN = 26;
 static const uint8_t CAN_RX_PIN = 27;
@@ -125,14 +122,6 @@ void refreshDigit(const SegmentPins &pins, uint8_t position, uint8_t number) {
   clearDisplay(pins);
 }
 
-void setSequentialLed(uint16_t value) {
-  uint8_t activeLed = value % 3;
-
-  for (uint8_t index = 0; index < 3; index++) {
-    digitalWrite(LED_PINS[index], index == activeLed ? HIGH : LOW);
-  }
-}
-
 void showNumberFor(uint16_t value, uint16_t holdMs) {
   uint8_t displayDigits[4] = {
     (uint8_t)((value / 1000) % 10),
@@ -147,6 +136,7 @@ void showNumberFor(uint16_t value, uint16_t holdMs) {
     for (uint8_t pos = 0; pos < 4; pos++) {
       refreshDigit(SEG1, pos, displayDigits[pos]);
       refreshDigit(SEG2, pos, displayDigits[pos]);
+      refreshDigit(SEG3, pos, displayDigits[pos]);
     }
   }
 }
@@ -158,28 +148,12 @@ void lampTestFor(uint16_t holdMs) {
     for (uint8_t pos = 0; pos < 4; pos++) {
       refreshDigit(SEG1, pos, 8);
       refreshDigit(SEG2, pos, 8);
+      refreshDigit(SEG3, pos, 8);
     }
   }
 }
 
-void ledWalkTest() {
-  for (uint8_t index = 0; index < 3; index++) {
-    for (uint8_t clearIndex = 0; clearIndex < 3; clearIndex++) {
-      digitalWrite(LED_PINS[clearIndex], LOW);
-    }
-
-    digitalWrite(LED_PINS[index], HIGH);
-    Serial.print("[LED] testing LED");
-    Serial.println(index + 1);
-    delay(1000);
-  }
-
-  for (uint8_t index = 0; index < 3; index++) {
-    digitalWrite(LED_PINS[index], LOW);
-  }
-}
-
-void segmentPairTest() {
+void segmentModuleTest() {
   Serial.println("[SEG1] lamp test only");
   uint32_t seg1StartedAt = millis();
   while (millis() - seg1StartedAt < 1500) {
@@ -193,6 +167,14 @@ void segmentPairTest() {
   while (millis() - seg2StartedAt < 1500) {
     for (uint8_t pos = 0; pos < 4; pos++) {
       refreshDigit(SEG2, pos, 8);
+    }
+  }
+
+  Serial.println("[SEG3] lamp test only");
+  uint32_t seg3StartedAt = millis();
+  while (millis() - seg3StartedAt < 1500) {
+    for (uint8_t pos = 0; pos < 4; pos++) {
+      refreshDigit(SEG3, pos, 8);
     }
   }
 }
@@ -242,12 +224,10 @@ void sendCanTestFrame() {
   if (result == ESP_OK) {
     Serial.print("[CAN TX] id=0x123 count=");
     Serial.println(canTxCounter);
-    digitalWrite(LED_PINS[0], !digitalRead(LED_PINS[0]));
     canTxCounter++;
   } else {
     Serial.print("[CAN TX] failed: ");
     Serial.println(result);
-    digitalWrite(LED_PINS[2], HIGH);
   }
 }
 
@@ -270,7 +250,6 @@ void receiveCanFrames() {
     }
 
     Serial.println();
-    digitalWrite(LED_PINS[1], !digitalRead(LED_PINS[1]));
   }
 }
 
@@ -291,7 +270,20 @@ void refreshDisplayOnce() {
 
   refreshDigit(SEG1, displayPosition, displayDigits[displayPosition]);
   refreshDigit(SEG2, displayPosition, displayDigits[displayPosition]);
+  refreshDigit(SEG3, displayPosition, displayDigits[displayPosition]);
   displayPosition = (displayPosition + 1) % 4;
+}
+
+void setupSegmentPins(const SegmentPins &pins) {
+  pinMode(pins.sclk, OUTPUT);
+  pinMode(pins.rclk, OUTPUT);
+  pinMode(pins.dio, OUTPUT);
+
+  digitalWrite(pins.sclk, LOW);
+  digitalWrite(pins.rclk, LOW);
+  digitalWrite(pins.dio, LOW);
+
+  clearDisplay(pins);
 }
 
 void setup() {
@@ -312,42 +304,23 @@ void setup() {
   Serial.print(SEG2.rclk);
   Serial.print(" / GPIO");
   Serial.println(SEG2.dio);
-  Serial.print("LED pins: GPIO");
-  Serial.print(LED_PINS[0]);
+  Serial.print("SEG3 pins SCLK/RCLK/DIO: GPIO");
+  Serial.print(SEG3.sclk);
   Serial.print(" / GPIO");
-  Serial.print(LED_PINS[1]);
+  Serial.print(SEG3.rclk);
   Serial.print(" / GPIO");
-  Serial.println(LED_PINS[2]);
+  Serial.println(SEG3.dio);
   Serial.print("CAN TX/RX: GPIO");
   Serial.print(CAN_TX_PIN);
   Serial.print(" / GPIO");
   Serial.println(CAN_RX_PIN);
 
-  pinMode(SEG1.sclk, OUTPUT);
-  pinMode(SEG1.rclk, OUTPUT);
-  pinMode(SEG1.dio, OUTPUT);
-  pinMode(SEG2.sclk, OUTPUT);
-  pinMode(SEG2.rclk, OUTPUT);
-  pinMode(SEG2.dio, OUTPUT);
+  setupSegmentPins(SEG1);
+  setupSegmentPins(SEG2);
+  setupSegmentPins(SEG3);
 
-  digitalWrite(SEG1.sclk, LOW);
-  digitalWrite(SEG1.rclk, LOW);
-  digitalWrite(SEG1.dio, LOW);
-  digitalWrite(SEG2.sclk, LOW);
-  digitalWrite(SEG2.rclk, LOW);
-  digitalWrite(SEG2.dio, LOW);
-
-  for (uint8_t index = 0; index < 3; index++) {
-    pinMode(LED_PINS[index], OUTPUT);
-    digitalWrite(LED_PINS[index], LOW);
-  }
-
-  clearDisplay(SEG1);
-  clearDisplay(SEG2);
-
-  ledWalkTest();
-  segmentPairTest();
-  Serial.println("[SEG1/SEG2] lamp test together: 8888");
+  segmentModuleTest();
+  Serial.println("[SEG1/SEG2/SEG3] lamp test together: 8888");
   lampTestFor(2000);
 
   canReady = startCan();
@@ -361,11 +334,9 @@ void loop() {
   if (nowMs - lastCountMs >= COUNT_HOLD_MS) {
     lastCountMs = nowMs;
     displayValue = (displayValue + 1) % 10000;
-    setSequentialLed(displayValue);
   }
 
   if (!canReady) {
-    digitalWrite(LED_PINS[2], HIGH);
     return;
   }
 

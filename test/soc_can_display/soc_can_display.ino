@@ -14,6 +14,7 @@
   Dashboard:
     disp1 shows SoC from CAN byte 4.
     disp2 shows temperature from CAN byte 5.
+    disp3 shows voltage from CAN byte 0~1.
 */
 
 #include <Arduino.h>
@@ -28,6 +29,7 @@ struct SegmentPins {
 
 static const SegmentPins DISP1 = {21, 22, 17};
 static const SegmentPins DISP2 = {18, 19, 23};
+static const SegmentPins DISP3 = {13, 14, 25};
 
 static const uint8_t CAN_TX_PIN = 26;
 static const uint8_t CAN_RX_PIN = 27;
@@ -43,6 +45,7 @@ static const uint16_t DIGIT_REFRESH_US = 250;
 
 static uint16_t disp1Value = 0;
 static uint16_t disp2Value = 0;
+static uint16_t disp3Value = 0;
 static uint8_t displayPosition = 0;
 static uint32_t lastDisplayRefreshUs = 0;
 static uint32_t lastSocRxMs = 0;
@@ -111,6 +114,10 @@ void refreshDigit(const SegmentPins &pins, uint8_t position, uint8_t number) {
   writeTwoBytes(pins, DIGITS[number], DIGIT_SELECT[position]);
   delayMicroseconds(DIGIT_REFRESH_US);
   clearDisplay(pins);
+}
+
+uint16_t clampDisplayValue(uint16_t value) {
+  return value > 9999 ? 9999 : value;
 }
 
 bool startCan() {
@@ -219,6 +226,7 @@ void receiveBatteryFrame() {
 
     disp1Value = soc;
     disp2Value = temperature;
+    disp3Value = clampDisplayValue(voltage);
     lastSocRxMs = millis();
     socReceived = true;
 
@@ -239,7 +247,7 @@ void receiveBatteryFrame() {
   }
 }
 
-void refreshDisp1() {
+void refreshDisplays() {
   uint32_t nowUs = micros();
   if (nowUs - lastDisplayRefreshUs < DISPLAY_REFRESH_INTERVAL_US) {
     return;
@@ -259,10 +267,29 @@ void refreshDisp1() {
     (uint8_t)((disp2Value / 10) % 10),
     (uint8_t)(disp2Value % 10)
   };
+  uint8_t disp3Digits[4] = {
+    (uint8_t)((disp3Value / 1000) % 10),
+    (uint8_t)((disp3Value / 100) % 10),
+    (uint8_t)((disp3Value / 10) % 10),
+    (uint8_t)(disp3Value % 10)
+  };
 
   refreshDigit(DISP1, displayPosition, disp1Digits[displayPosition]);
   refreshDigit(DISP2, displayPosition, disp2Digits[displayPosition]);
+  refreshDigit(DISP3, displayPosition, disp3Digits[displayPosition]);
   displayPosition = (displayPosition + 1) % 4;
+}
+
+void setupSegmentPins(const SegmentPins &pins) {
+  pinMode(pins.sclk, OUTPUT);
+  pinMode(pins.rclk, OUTPUT);
+  pinMode(pins.dio, OUTPUT);
+
+  digitalWrite(pins.sclk, LOW);
+  digitalWrite(pins.rclk, LOW);
+  digitalWrite(pins.dio, LOW);
+
+  clearDisplay(pins);
 }
 
 void setup() {
@@ -283,36 +310,32 @@ void setup() {
   Serial.print(DISP2.rclk);
   Serial.print(" / GPIO");
   Serial.println(DISP2.dio);
+  Serial.print("DISP3 SCLK/RCLK/DIO: GPIO");
+  Serial.print(DISP3.sclk);
+  Serial.print(" / GPIO");
+  Serial.print(DISP3.rclk);
+  Serial.print(" / GPIO");
+  Serial.println(DISP3.dio);
   Serial.print("CAN TX/RX: GPIO");
   Serial.print(CAN_TX_PIN);
   Serial.print(" / GPIO");
   Serial.println(CAN_RX_PIN);
 
-  pinMode(DISP1.sclk, OUTPUT);
-  pinMode(DISP1.rclk, OUTPUT);
-  pinMode(DISP1.dio, OUTPUT);
-  pinMode(DISP2.sclk, OUTPUT);
-  pinMode(DISP2.rclk, OUTPUT);
-  pinMode(DISP2.dio, OUTPUT);
-  digitalWrite(DISP1.sclk, LOW);
-  digitalWrite(DISP1.rclk, LOW);
-  digitalWrite(DISP1.dio, LOW);
-  digitalWrite(DISP2.sclk, LOW);
-  digitalWrite(DISP2.rclk, LOW);
-  digitalWrite(DISP2.dio, LOW);
-  clearDisplay(DISP1);
-  clearDisplay(DISP2);
+  setupSegmentPins(DISP1);
+  setupSegmentPins(DISP2);
+  setupSegmentPins(DISP3);
 
   canReady = startCan();
-  Serial.println("[CAN] waiting for ID 0x100, SoC at byte 4, temp at byte 5");
+  Serial.println("[CAN] waiting for ID 0x100, SoC byte 4, temp byte 5, voltage bytes 0~1");
 }
 
 void loop() {
-  refreshDisp1();
+  refreshDisplays();
 
   if (!canReady) {
     disp1Value = 0;
     disp2Value = 0;
+    disp3Value = 0;
     return;
   }
 
@@ -329,6 +352,8 @@ void loop() {
       Serial.print(disp1Value);
       Serial.print(" temp=");
       Serial.print(disp2Value);
+      Serial.print(" voltage=");
+      Serial.print(disp3Value);
     }
     Serial.println();
   }

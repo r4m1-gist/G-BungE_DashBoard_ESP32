@@ -43,4 +43,4 @@ test/
 
 ## Notes
 
-The main sketch is currently being built around the Sevcon Gen4 Size 6 controller.
+The main sketch is currently being built around the Monolith from Sevcon Gen4 Size 6 controller.

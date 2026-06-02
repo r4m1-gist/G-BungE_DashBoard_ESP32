@@ -1,8 +1,9 @@
-이 프로젝트는 마지막 Baja 종목 차량 Mk.5에 들어가는 ESP32 기반 대시보드입니다.
+This project is an ESP32-based dashboard for the final Baja vehicle, Mk.5.
+It aims to display vehicle status on 4-digit 7-segment modules using CAN data from the Sevcon Gen4 Size 6 controller.
 
 # G-BungE Dashboard ESP32
 
-G-BungE Mk.5 Baja EV 대시보드용 ESP32 펌웨어 및 하드웨어 자료 저장소입니다. Sevcon Gen4 Size 6 컨트롤러의 CAN 데이터를 받아 4-digit 7-segment 모듈에 차량 상태를 표시하는 것을 목표로 합니다.
+Firmware and hardware resources for the G-BungE Mk.5 Baja EV dashboard.
 
 ## Project Layout
 
@@ -31,9 +32,9 @@ Hardware/
 
 ## Firmware
 
-- `Firmware/main/main.ino`: Mk.5 차량 적용을 위한 메인 대시보드 스케치
-- `Firmware/test/ledsegmentcheck/ledsegmentcheck.ino`: 7-segment 모듈 3개와 CAN 송수신 기본 점검용 스케치
-- `Firmware/test/soc_can_display/soc_can_display.ino`: CAN으로 수신한 SoC, 온도, 전압 값을 표시하는 테스트 스케치
+- `Firmware/main/main.ino`: main dashboard sketch for the Mk.5 vehicle
+- `Firmware/test/ledsegmentcheck/ledsegmentcheck.ino`: basic check sketch for three 7-segment modules and CAN communication
+- `Firmware/test/soc_can_display/soc_can_display.ino`: test sketch for displaying SoC, temperature, and voltage values received over CAN
 
 ## Hardware
 

@@ -1,7 +1,7 @@
+# G-BungE Dashboard ESP32
+
 This project is an ESP32-based dashboard for the final Baja vehicle, Mk.5.
 It aims to display vehicle status on 4-digit 7-segment modules using CAN data from the Sevcon Gen4 Size 6 controller.
-
-# G-BungE Dashboard ESP32
 
 Firmware and hardware resources for the G-BungE Mk.5 Baja EV dashboard.
 

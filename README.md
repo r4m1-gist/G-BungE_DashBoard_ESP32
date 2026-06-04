@@ -5,6 +5,8 @@ It aims to display vehicle status on 4-digit 7-segment modules using CAN data fr
 
 Firmware and hardware resources for the G-BungE Mk.5 Baja EV dashboard.
 
+![G-BungE Dashboard PCB preview](Hardware/images/dashboard-pcb-preview.png)
+
 ## Project Layout
 
 ```text
@@ -20,14 +22,22 @@ Firmware/
       soc_can_display.ino
 
 Hardware/
-  009_GBdashboard.kicad_pcb
-  009_GBdashboard.kicad_pro
-  009_GBdashboard.kicad_sch
   README.md
 
-  gerber/
-    009_GBdashboard.zip
-    info.md
+  PCB KiCAD files/
+    009_GBdashboard.kicad_pcb
+    009_GBdashboard.kicad_pro
+    009_GBdashboard.kicad_sch
+
+    gerber/
+      009_GBdashboard.zip
+      info.md
+
+  STEP files/
+    DashBoard PLA Housing.step
+
+  images/
+    dashboard-pcb-preview.png
 ```
 
 ## Firmware
@@ -41,8 +51,9 @@ Hardware/
 - Controller: NodeMCU ESP32-S
 - CAN transceiver: SN65HVD230
 - Display: 4-digit 7-segment module x3
-- PCB source: `Hardware/009_GBdashboard.kicad_pcb`, `Hardware/009_GBdashboard.kicad_sch`, `Hardware/009_GBdashboard.kicad_pro`
-- Manufacturing export: `Hardware/gerber/009_GBdashboard.zip`
+- PCB source: `Hardware/PCB KiCAD files/009_GBdashboard.kicad_pcb`, `Hardware/PCB KiCAD files/009_GBdashboard.kicad_sch`, `Hardware/PCB KiCAD files/009_GBdashboard.kicad_pro`
+- Manufacturing export: `Hardware/PCB KiCAD files/gerber/009_GBdashboard.zip`
+- 3D PLA housing: `Hardware/STEP files/DashBoard PLA Housing.step`
 
 ## Pin Map
 

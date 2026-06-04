@@ -1,9 +1,16 @@
 # Hardware
 
-KiCad PCB files will be stored here.
+Hardware resources for the G-BungE Mk.5 ESP32 dashboard.
 
-Made by quserunknownp.
+![G-BungE Dashboard PCB preview](images/dashboard-pcb-preview.png)
 
-3D PLA Housing STEP files will be stored here.
+## PCB KiCad Files
 
-Made by r4m1.
+- Source files: `PCB KiCAD files/009_GBdashboard.kicad_pcb`, `PCB KiCAD files/009_GBdashboard.kicad_sch`, `PCB KiCAD files/009_GBdashboard.kicad_pro`
+- Gerber export: `PCB KiCAD files/gerber/009_GBdashboard.zip`
+- Made by quserunknownp.
+
+## STEP Files
+
+- Dashboard PLA housing: `STEP files/DashBoard PLA Housing.step`
+- Made by r4m1.
